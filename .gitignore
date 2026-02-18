@@ -1,2 +1,22 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Python-specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Project artifacts
+results/
 data/
 
+# Environment (in case you create one later)
+venv/
+.venv/
+env/
+
+# Slurm/HPC logs (if your slurm_scripts generate .out or .err files here)
+*.out
+*.err
