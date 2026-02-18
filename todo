@@ -1,0 +1,8 @@
+github educational account
+Run the copilot tutorial once
+Development flow
+- test on local and push to github
+- pull on Sherlock
+- submit jobs
+Read documents (ml load - on Sherlock, ml spider, conda activate - local)
+In shell file, some are shell command, some are script command 
