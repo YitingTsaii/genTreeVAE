@@ -11,6 +11,7 @@ __pycache__/
 # Project artifacts
 results/
 data/
+slurm_scripts/
 
 # Environment (in case you create one later)
 venv/
