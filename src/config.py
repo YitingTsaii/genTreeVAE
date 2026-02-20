@@ -11,8 +11,9 @@ CONSTRAINT_WEIGHT = 10
 
 # Data paths (adjust to your setup)
 # Prefer local workspace `data/` and `results/` directories by default
-BASE_DATA_PATH = "./data/"
-RESULTS_PATH = "./results/"
+# Use project-root-relative paths so running `python3 run/run.py` works from root
+BASE_DATA_PATH = "data/"
+RESULTS_PATH = "results/"
 
 # Configuration by number of tips
 config_by_ntip = {

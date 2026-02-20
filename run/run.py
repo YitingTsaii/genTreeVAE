@@ -5,13 +5,14 @@
 
 import argparse
 import os
+
 import sys
 import pandas as pd
 import torch
 import numpy as np
 
-# Add src to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add project root to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.config import (
     config_by_ntip, SEED, EPOCHS, RESULTS_PATH, WEIGHTS_TO_TRY
