@@ -6,28 +6,51 @@ import torch
 from torch.nn import functional as F_nn
 from ..config import LOG_INTERVAL
 
-
+# using "mean" for recon loss, kl loss, struct loss
 def loss_function_Fmat(recon_x, x, mu, logvar, struct_loss, constraint_weight):
-    """
-    Computes the Fmat-aware loss for the Phylogenetic VAE.
+    batch_size = x.size(0)
+    input_dim = x.size(1) # This is n^2
+    latent_dim = mu.size(1)
 
-    Args:
-        recon_x (Tensor): Reconstructed flattened F-matrix (batch_size, input_dim).
-        x (Tensor): Original input flattened F-matrix (batch_size, input_dim).
-        mu (Tensor): Mean of the latent Gaussian distribution.
-        logvar (Tensor): Log-variance of the latent Gaussian distribution.
-        struct_loss (Tensor): Scalar loss from FMatrixLayer representing constraint violations.
-        constraint_weight (float): Hyperparameter scaling the importance of structural validity.
+    # 1. Reconstruction Loss (Mean per element: 1/n^2)
+    # Using 'mean' here automatically divides the sum by (batch_size * input_dim)
+    recon_loss = F_nn.mse_loss(recon_x, x, reduction='mean') 
 
-    Returns:
-        tuple: (total_loss, recon_loss, kl_loss, weighted_struct_loss)
-               Returns individual components for logging/monitoring.
-    """
-    recon_loss = F_nn.mse_loss(recon_x, x, reduction='sum')  # MSE loss for reconstruction
-    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())  # KL divergence
-    weighted_struct_loss = constraint_weight * struct_loss
+    # 2. KL Divergence (Normalized by latent dimension L)
+    # We take the sum per batch, then average over the batch and latent dims
+    kl_sum = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    kl_loss = kl_sum / (batch_size * latent_dim)
+
+    # 3. Structured Loss (Normalized by input_dim n^2)
+    # This keeps the penalty relative to the size of the matrix entries
+    normalized_struct_loss = struct_loss / input_dim
+    weighted_struct_loss = constraint_weight * normalized_struct_loss
+
     total_loss = recon_loss + kl_loss + weighted_struct_loss
     return total_loss, recon_loss, kl_loss, weighted_struct_loss
+
+# using "sum" for recon loss, kl loss, struct loss
+# def loss_function_Fmat(recon_x, x, mu, logvar, struct_loss, constraint_weight):
+#     """
+#     Computes the Fmat-aware loss for the Phylogenetic VAE.
+
+#     Args:
+#         recon_x (Tensor): Reconstructed flattened F-matrix (batch_size, input_dim).
+#         x (Tensor): Original input flattened F-matrix (batch_size, input_dim).
+#         mu (Tensor): Mean of the latent Gaussian distribution.
+#         logvar (Tensor): Log-variance of the latent Gaussian distribution.
+#         struct_loss (Tensor): Scalar loss from FMatrixLayer representing constraint violations.
+#         constraint_weight (float): Hyperparameter scaling the importance of structural validity.
+
+#     Returns:
+#         tuple: (total_loss, recon_loss, kl_loss, weighted_struct_loss)
+#                Returns individual components for logging/monitoring.
+#     """
+#     recon_loss = F_nn.mse_loss(recon_x, x, reduction='sum')  # MSE loss for reconstruction
+#     kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())  # KL divergence
+#     weighted_struct_loss = constraint_weight * struct_loss
+#     total_loss = recon_loss + kl_loss + weighted_struct_loss
+#     return total_loss, recon_loss, kl_loss, weighted_struct_loss
 
 
 def train(model, train_loader, optimizer, device, epoch, latent_dim, constraint_weight):
