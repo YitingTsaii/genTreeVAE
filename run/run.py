@@ -5,6 +5,7 @@
 
 import argparse
 import os
+import random
 
 import sys
 import pandas as pd
@@ -32,8 +33,13 @@ def main(args):
     """
     # Setup device
     use_accel = torch.accelerator.is_available()
-    torch.manual_seed(SEED)
-    
+
+    # Seed selection: CLI-provided seed overrides config.SEED
+    seed = args.seed if getattr(args, 'seed', None) is not None else SEED
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
     if use_accel:
         device = torch.accelerator.current_accelerator()
     else:
@@ -95,6 +101,7 @@ def main(args):
     result_dict = {
         'latent_dim': latent_dim,
         'weight': constraint_weight,
+        'seed': seed,
         **metrics
     }
     
@@ -142,6 +149,13 @@ if __name__ == "__main__":
         type=int,
         default=5,
         help="Number of training epochs"
+    )
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed (overrides config.SEED)"
     )
     
     args = parser.parse_args()

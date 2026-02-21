@@ -12,6 +12,7 @@ __pycache__/
 results/
 data/
 slurm_scripts/
+others/
 
 # Environment (in case you create one later)
 venv/
