@@ -107,7 +107,7 @@ def main(args):
     
     save_path = os.path.join(
         RESULTS_PATH,
-        f"run_ntip{ntip}_ldim{latent_dim}_w{constraint_weight}.csv"
+        f"run_ntip{ntip}_ldim{latent_dim}_w{constraint_weight}_seed{seed}.csv"
     )
     
     df = pd.DataFrame([result_dict])
